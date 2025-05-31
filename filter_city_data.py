@@ -14,8 +14,8 @@ import pandas as pd
 import json
 import os
 import numpy as np
-from typing import Set, List, Dict, Any
-from collections import Counter, defaultdict
+from typing import Set, List, Dict
+from collections import defaultdict
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 
@@ -130,20 +130,14 @@ class YelpRestaurantFilter:
                         business_id = review.get('business_id')
                         
                         if business_id in business_ids:
-                            # Calculate sentiment score using VADER
+                            # Calculate sentiment score using VADER (only compound score)
                             text = review.get('text', '')
                             if text:
                                 sentiment_scores = self.sentiment_analyzer.polarity_scores(text)
                                 review['sentiment_compound'] = sentiment_scores['compound']
-                                review['sentiment_pos'] = sentiment_scores['pos']
-                                review['sentiment_neu'] = sentiment_scores['neu']
-                                review['sentiment_neg'] = sentiment_scores['neg']
                             else:
                                 # Default neutral sentiment if no text
                                 review['sentiment_compound'] = 0.0
-                                review['sentiment_pos'] = 0.0
-                                review['sentiment_neu'] = 1.0
-                                review['sentiment_neg'] = 0.0
                             
                             reviews_by_business[business_id].append(review)
                             total_reviews += 1
@@ -163,7 +157,7 @@ class YelpRestaurantFilter:
         Create the final dataset for Bayesian regression analysis
         
         Returns:
-            DataFrame with columns: business_id, avg_rating, avg_sentiment_score, log_review_count
+            DataFrame with columns: business_id, name, avg_rating, avg_sentiment_score, log_review_count
         """
         print("Creating Bayesian regression dataset...")
         
@@ -209,12 +203,9 @@ class YelpRestaurantFilter:
                 final_data.append({
                     'business_id': business_id,
                     'name': restaurant.get('name', ''),
-                    'categories': restaurant.get('categories', ''),
                     'avg_rating': avg_rating,
                     'avg_sentiment_score': avg_sentiment_score,
                     'log_review_count': log_review_count,
-                    'review_count': actual_review_count,
-                    'address': restaurant.get('address', ''),
                 })
         
         result_df = pd.DataFrame(final_data)
@@ -235,7 +226,6 @@ class YelpRestaurantFilter:
         print(f"Average rating: {df['avg_rating'].mean():.2f} ± {df['avg_rating'].std():.2f}")
         print(f"Average sentiment: {df['avg_sentiment_score'].mean():.3f} ± {df['avg_sentiment_score'].std():.3f}")
         print(f"Average log review count: {df['log_review_count'].mean():.2f} ± {df['log_review_count'].std():.2f}")
-        print(f"Review count range: {df['review_count'].min()} to {df['review_count'].max()}")
         
         print(f"\nRating distribution:")
         rating_counts = df['avg_rating'].value_counts().sort_index()
