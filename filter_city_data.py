@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Yelp Dataset City Filter for Bayesian Regression Project
+Yelp Dataset CA Restaurant Filter for Bayesian Regression Project
 
-This script filters the Yelp dataset to focus on restaurants in Reno, NV.
+This script filters the Yelp dataset to focus on restaurants in CA with 50-1000 reviews.
 It performs sentiment analysis and creates the dataset format needed for
 predicting Yelp ratings from review sentiment and popularity using Bayesian regression.
 
@@ -45,54 +45,32 @@ class YelpRestaurantFilter:
         
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
     
-    def is_restaurant(self, categories: str) -> bool:
+    def load_ca_restaurants(self) -> pd.DataFrame:
         """
-        Check if a business is a restaurant based on its categories
-        
-        Args:
-            categories: Comma-separated string of business categories
-            
-        Returns:
-            True if the business is a restaurant
-        """
-        if not categories or pd.isna(categories):
-            return False
-        
-        categories_lower = categories.lower()
-        restaurant_keywords = [
-            'restaurant', 'food', 'pizza', 'burger', 'cafe', 'coffee',
-            'bar', 'pub', 'diner', 'bistro', 'grill', 'kitchen',
-            'eatery', 'bakery', 'steakhouse', 'seafood', 'mexican',
-            'italian', 'chinese', 'thai', 'indian', 'sushi', 'bbq'
-        ]
-        
-        return any(keyword in categories_lower for keyword in restaurant_keywords)
-    
-    def load_reno_restaurants(self) -> pd.DataFrame:
-        """
-        Load all restaurants in Reno, NV
+        Load restaurants in CA with 50-1000 reviews (matching notebook filters)
         
         Returns:
-            DataFrame containing restaurant businesses in Reno
+            DataFrame containing restaurant businesses in CA
         """
-        print("Loading restaurants in Reno, NV...")
+        print("Loading restaurants in CA with 50-1000 reviews...")
         restaurants = []
         
         try:
             with open(self.business_file, 'r', encoding='utf-8') as f:
                 for i, line in enumerate(f):
                     if i % 10000 == 0 and i > 0:
-                        print(f"Processed {i} businesses, found {len(restaurants)} Reno restaurants")
+                        print(f"Processed {i} businesses, found {len(restaurants)} CA restaurants")
                     
                     try:
                         business = json.loads(line)
                         
-                        # Filter for Reno, NV
-                        if (business.get('city', '').strip() == 'Reno' and 
-                            business.get('state', '').strip() == 'NV'):
+                        # Apply the same filters as in the notebook
+                        if business.get("categories"):
+                            categories = business["categories"].split(", ")
                             
-                            # Check if it's a restaurant
-                            if self.is_restaurant(business.get('categories', '')):
+                            if ("Restaurants" in categories and 
+                                business.get("state") == "CA" and 
+                                50 < business.get("review_count", 0) < 1000):
                                 restaurants.append(business)
                                 
                     except json.JSONDecodeError:
@@ -102,7 +80,7 @@ class YelpRestaurantFilter:
             print(f"Error: Business file not found at {self.business_file}")
             return pd.DataFrame()
         
-        print(f"Found {len(restaurants)} restaurants in Reno, NV")
+        print(f"Found {len(restaurants)} restaurants in CA with 50-1000 reviews")
         return pd.DataFrame(restaurants)
     
     def load_reviews_with_sentiment(self, business_ids: Set[str]) -> Dict[str, List[Dict]]:
@@ -149,7 +127,7 @@ class YelpRestaurantFilter:
             print(f"Error: Review file not found at {self.review_file}")
             return {}
         
-        print(f"Found {total_reviews} reviews for Reno restaurants")
+        print(f"Found {total_reviews} reviews for CA restaurants")
         return dict(reviews_by_business)
     
     def create_bayesian_dataset(self) -> pd.DataFrame:
@@ -162,10 +140,10 @@ class YelpRestaurantFilter:
         print("Creating Bayesian regression dataset...")
         
         # Load restaurants
-        restaurants_df = self.load_reno_restaurants()
+        restaurants_df = self.load_ca_restaurants()
         
         if restaurants_df.empty:
-            print("No restaurants found in Reno, NV")
+            print("No restaurants found in CA with 50-1000 reviews")
             return pd.DataFrame()
         
         # Get business IDs
@@ -221,7 +199,7 @@ class YelpRestaurantFilter:
             print("Dataset is empty")
             return
         
-        print(f"\n=== Reno Restaurant Dataset Statistics ===")
+        print(f"\n=== CA Restaurant Dataset Statistics ===")
         print(f"Total restaurants: {len(df):,}")
         print(f"Average rating: {df['avg_rating'].mean():.2f} ± {df['avg_rating'].std():.2f}")
         print(f"Average sentiment: {df['avg_sentiment_score'].mean():.3f} ± {df['avg_sentiment_score'].std():.3f}")
@@ -240,7 +218,7 @@ class YelpRestaurantFilter:
 
 def main():
     """
-    Main function to create the Reno restaurant dataset for Bayesian regression
+    Main function to create the CA restaurant dataset for Bayesian regression
     """
     # Initialize the filter
     filter_tool = YelpRestaurantFilter()
@@ -253,7 +231,7 @@ def main():
     
     print("="*60)
     print("YELP BAYESIAN REGRESSION DATASET CREATION")
-    print("Filtering for: Restaurants in Reno, NV")
+    print("Filtering for: Restaurants in CA with 50-1000 reviews")
     print("="*60)
     
     # Create the Bayesian regression dataset
@@ -264,7 +242,7 @@ def main():
         filter_tool.print_dataset_statistics(dataset_df)
         
         # Save the dataset
-        output_file = "reno_restaurants_bayesian_dataset.csv"
+        output_file = "ca_restaurants_bayesian_dataset.csv"
         dataset_df.to_csv(output_file, index=False)
         print(f"\nDataset saved to: {output_file}")
         

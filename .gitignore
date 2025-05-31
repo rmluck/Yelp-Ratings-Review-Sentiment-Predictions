@@ -12,7 +12,7 @@ Yelp JSON/
 *.tar
 
 # Generated datasets
-reno_restaurants_bayesian_dataset.csv
+ca_restaurants_bayesian_dataset.csv
 filtered_data/
 
 # Other
