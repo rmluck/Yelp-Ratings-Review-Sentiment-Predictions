@@ -14,7 +14,6 @@ import pandas as pd
 import json
 import os
 import numpy as np
-from typing import Set, List, Dict
 from collections import defaultdict
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
@@ -45,7 +44,7 @@ class YelpRestaurantFilter:
         
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
     
-    def load_ca_restaurants(self) -> pd.DataFrame:
+    def load_ca_restaurants(self):
         """
         Load restaurants in CA with 50-1000 reviews (matching notebook filters)
         
@@ -83,7 +82,7 @@ class YelpRestaurantFilter:
         print(f"Found {len(restaurants)} restaurants in CA with 50-1000 reviews")
         return pd.DataFrame(restaurants)
     
-    def load_reviews_with_sentiment(self, business_ids: Set[str]) -> Dict[str, List[Dict]]:
+    def load_reviews_with_sentiment(self, business_ids):
         """
         Load reviews for restaurants and calculate sentiment scores
         
@@ -130,7 +129,7 @@ class YelpRestaurantFilter:
         print(f"Found {total_reviews} reviews for CA restaurants")
         return dict(reviews_by_business)
     
-    def create_bayesian_dataset(self) -> pd.DataFrame:
+    def create_bayesian_dataset(self):
         """
         Create the final dataset for Bayesian regression analysis
         
@@ -168,10 +167,11 @@ class YelpRestaurantFilter:
             if reviews:
                 sentiment_scores = [r['sentiment_compound'] for r in reviews]
                 avg_sentiment_score = np.mean(sentiment_scores)
-                actual_review_count = len(reviews)  # Use actual review count from our data
+                actual_review_count = len(reviews)
             else:
-                avg_sentiment_score = 0.0  # Neutral sentiment if no reviews
-                actual_review_count = review_count  # Fall back to business metadata
+                # Neutral sentiment if no reviews
+                avg_sentiment_score = 0.0  
+                actual_review_count = review_count 
             
             # Calculate log review count (adding 1 to avoid log(0))
             log_review_count = np.log(1 + actual_review_count)
@@ -191,7 +191,7 @@ class YelpRestaurantFilter:
         
         return result_df
     
-    def print_dataset_statistics(self, df: pd.DataFrame):
+    def print_dataset_statistics(self, df):
         """
         Print statistics about the final dataset
         """
