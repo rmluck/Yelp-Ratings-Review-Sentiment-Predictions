@@ -200,10 +200,10 @@ class YelpRestaurantFilter:
             return
         
         print(f"\n=== CA Restaurant Dataset Statistics ===")
-        print(f"Total restaurants: {len(df):,}")
-        print(f"Average rating: {df['avg_rating'].mean():.2f} ± {df['avg_rating'].std():.2f}")
+        print(f"Total restaurants: {len(df)}")
+        print(f"Average rating: {df['avg_rating'].mean():.3f} ± {df['avg_rating'].std():.3f}")
         print(f"Average sentiment: {df['avg_sentiment_score'].mean():.3f} ± {df['avg_sentiment_score'].std():.3f}")
-        print(f"Average log review count: {df['log_review_count'].mean():.2f} ± {df['log_review_count'].std():.2f}")
+        print(f"Average log review count: {df['log_review_count'].mean():.3f} ± {df['log_review_count'].std():.3f}")
         
         print(f"\nRating distribution:")
         rating_counts = df['avg_rating'].value_counts().sort_index()
@@ -229,11 +229,6 @@ def main():
         print("Please ensure the dataset is extracted to 'Yelp JSON/yelp_dataset/'")
         return
     
-    print("="*60)
-    print("YELP BAYESIAN REGRESSION DATASET CREATION")
-    print("Filtering for: Restaurants in CA with 50-1000 reviews")
-    print("="*60)
-    
     # Create the Bayesian regression dataset
     dataset_df = filter_tool.create_bayesian_dataset()
     
@@ -245,10 +240,6 @@ def main():
         output_file = "ca_restaurants_bayesian_dataset.csv"
         dataset_df.to_csv(output_file, index=False)
         print(f"\nDataset saved to: {output_file}")
-        
-        print(f"\nDataset ready for Bayesian regression!")
-        print(f"Target variable: avg_rating")
-        print(f"Features: avg_sentiment_score, log_review_count")
         
         # Show a few examples
         print(f"\nFirst 5 restaurants:")
