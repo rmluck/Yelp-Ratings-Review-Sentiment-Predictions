@@ -199,11 +199,10 @@ class YelpRestaurantFilter:
             print("Dataset is empty")
             return
         
-        print(f"\n=== CA Restaurant Dataset Statistics ===")
         print(f"Total restaurants: {len(df)}")
-        print(f"Average rating: {df['avg_rating'].mean():.3f} ± {df['avg_rating'].std():.3f}")
-        print(f"Average sentiment: {df['avg_sentiment_score'].mean():.3f} ± {df['avg_sentiment_score'].std():.3f}")
-        print(f"Average log review count: {df['log_review_count'].mean():.3f} ± {df['log_review_count'].std():.3f}")
+        print(f"Average rating: {df['avg_rating'].mean():.3f} +- {df['avg_rating'].std():.3f}")
+        print(f"Average sentiment: {df['avg_sentiment_score'].mean():.3f} +- {df['avg_sentiment_score'].std():.3f}")
+        print(f"Average log review count: {df['log_review_count'].mean():.3f} +- {df['log_review_count'].std():.3f}")
         
         print(f"\nRating distribution:")
         rating_counts = df['avg_rating'].value_counts().sort_index()
